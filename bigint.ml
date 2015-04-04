@@ -1,9 +1,11 @@
 (*  Bigint module by ghukas_g and malbra_t *)
 
-module type Bigint =
+module type BIGINT =
   sig
 
     type sign
+
+    type abs_value
 
     type t
 
@@ -29,7 +31,7 @@ module type Bigint =
 
   end
 
-module Bigint =
+module Bigint : BIGINT =
   struct
 
     type sign = Minus | Zero | Plus
@@ -85,6 +87,7 @@ module Bigint =
     let string_of_bigint (sign, abs_value) = match sign with
       | Minus -> "-"^abs_value
       | Plus -> abs_value
+      | Zero -> "0"
 
     let _base = "0123456789ABCDEF"
 
@@ -168,7 +171,6 @@ module Bigint =
 	       else n2
       in let rec _mul_eq n1 n2 =
 	   let l1 = String.length n1 in
-	   let l2 = String.length n2 in
 	   if l1 == 1
 	   then string_of_int ((String.index _base n1.[0]) * (String.index _base n2.[0]))
 	   else
@@ -194,7 +196,7 @@ module Bigint =
     then (Plus, _mul abs_value abs_value2)
     else (Minus, _mul abs_value abs_value2)
 
-  let _div n1 n2 =
+  (* let _div n1 n2 = *)
 
 
   (* let string_of_bigint_base base (sign, abs_value) = *)

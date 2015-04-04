@@ -1,7 +1,7 @@
 (*  Bigint module by ghukas_g and malbra_t *)
 
 
-module type Bigint =
+module type BIGINT =
   sig
 
     type sign
