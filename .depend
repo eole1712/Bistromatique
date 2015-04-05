@@ -1,9 +1,0 @@
-bigint.cmi :
-arithExpr.cmi : bigint.cmi
-parser.cmi : arithExpr.cmi
-bigint.cmo : bigint.cmi
-bigint.cmx : bigint.cmi
-arithExpr.cmo : bigint.cmi arithExpr.cmi
-arithExpr.cmx : bigint.cmx arithExpr.cmi
-main.cmo : parser.cmi bigint.cmi arithExpr.cmi
-main.cmx : parser.cmi bigint.cmx arithExpr.cmx

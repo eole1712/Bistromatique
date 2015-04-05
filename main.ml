@@ -6,11 +6,10 @@ let main () =
     let lexbuf = Lexing.from_channel stdin in
     while true do
       begin
-	let k = Parser.line Lexer.token lexbuf in
-	begin
-	  print_endline (ArithExpr.string_of_arith_expr k);
+	try
+	  let k = Parser.line Lexer.token lexbuf in
 	  print_endline (Bigint.string_of_bigint (ArithExpr.solve_arith_expr k))
-	end
+	with b
       end
     done
   with End_of_file -> exit 0
