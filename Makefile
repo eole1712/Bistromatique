@@ -5,14 +5,14 @@
 ## Login   <ghukas_g@epitech.net>
 ##
 ## Started on  Thu Apr  2 18:06:52 2015 Grisha GHUKASYAN
-## Last update Thu Apr  2 18:50:36 2015 Grisha GHUKASYAN
+## Last update Sun Apr  5 15:12:19 2015 Grisha GHUKASYAN
 ##
 
 NAME = bistro
 
-ML =	bigint.ml
+ML =	bigint.ml arithExpr.ml parser.ml lexer.ml main.ml
 
-MLI =	bigint.mli
+MLI =	bigint.mli arithExpr.mli parser.mli
 
 LIB =	str.cma
 
@@ -25,7 +25,6 @@ CAMLFLAGS = -w Aelz -warn-error A
 OCAMLC = ocamlc $(CAMLFLAGS)
 OCAMLOPT = ocamlopt $(CAMLFLAGS)
 OCAMLDOC = ocamldoc -html -d $(ROOT)/doc
-
 
 all:		.depend $(CMI) $(NAME)
 
