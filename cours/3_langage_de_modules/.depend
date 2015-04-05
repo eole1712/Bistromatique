@@ -1,5 +1,0 @@
-assistants.cmi :
-assistants.cmo : assistants.cmi
-assistants.cmx : assistants.cmi
-main.cmo : assistants.cmi
-main.cmx : assistants.cmx

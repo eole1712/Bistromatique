@@ -5,7 +5,7 @@
 ## Login   <ghukas_g@epitech.net>
 ##
 ## Started on  Thu Apr  2 18:06:52 2015 Grisha GHUKASYAN
-## Last update Sun Apr  5 15:43:55 2015 Grisha GHUKASYAN
+## Last update Sun Apr  5 15:44:41 2015 Grisha GHUKASYAN
 ##
 
 NAME = bistro
@@ -68,7 +68,7 @@ re:		fclean all
 
 
 clean:
-		rm -f *.cmi $(CMO) $(CMX) $(OBJ) .depend
+		rm -f *.cmi $(CMO) $(CMX) $(OBJ) $(OMLY) $(OMLL) .depend
 
 
 fclean: 	clean
