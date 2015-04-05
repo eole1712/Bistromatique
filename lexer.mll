@@ -7,7 +7,7 @@ let octadigit = ['0'-'7']
 let decadigit = ['0'-'9']
 let hexadigit = ['0'-'9' 'A'-'F']
 
-let number = "0b"binadigit+ | "0"octadigit+ | decadigit+ | "Ox"hexadigit+
+let number = "0b"binadigit+ | "0"octadigit+ | decadigit+ | "0x"hexadigit+
 
 let add = "+"
 let sub = "-"

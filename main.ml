@@ -1,8 +1,3 @@
-(* let print_error s = *)
-(*   flush stderr; *)
-(*   print_endline s; *)
-(*   flush stdout *)
-
 let main () =
   try
     while true do

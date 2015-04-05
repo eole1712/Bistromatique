@@ -8,10 +8,6 @@ type abs_value = string
 
 type t = (sign * abs_value)
 
-(* let abs_value (_, value) = value *)
-
-(* let get_sign (sign, value) = sign *)
-
 (* String Outils  *)
 
 let _move_left abs_value n =
@@ -39,32 +35,6 @@ let isZero s =
   else false
 
 (* End String Outils  *)
-
-let bigint_of_string s =
-  let my_string_without_sign s i len si =
-    if si == true
-    then (Plus , dec(pure (String.sub s i len) 0))
-    else (Minus , (pure (String.sub s i len) 0))
-  in let rec my_bigint_of_string s i len sign =
-       if len < 0 then failwith (invalid_arg "Empty String")
-       else
-	 match s.[i] with
-	 | '-' -> my_bigint_of_string s (i + 1) (len - 1) (not sign)
-	 | '+' -> my_bigint_of_string s (i + 1) (len - 1) (sign)
-	 | _ -> my_string_without_sign s i len sign
-     in let z = pure s 0 in
-	if (String.length z) == 0
-	then raise (invalid_arg "Empty String")
-	else if (String.length z) == 1 && z.[0] == '0'
-	then (Zero, "0")
-	else my_bigint_of_string s 0 (String.length s) true
-
-let string_of_bigint (sign, abs_value) = match sign with
-  | Minus -> "-"^abs_value
-  | Plus -> abs_value
-  | Zero -> "0"
-
-
 
 let get_abs_value (_, abs_value) = abs_value
 
@@ -275,8 +245,8 @@ let rec my_string_of_bigint_base base nbr =
 
 let rec my_base_to_dec str base i res =
   if i = (String.length str)
-  then string_of_bigint (res)
-  else let res = (add (mul res base) (bigint_of_string (string_of_int (String.index _base str.[i])))) in
+  then get_abs_value res
+  else let res = (add (mul res base) (Plus, (string_of_int (String.index _base str.[i])))) in
     my_base_to_dec str base (i + 1) res
 
 let binaryregexp = Str.regexp "^0b.*"
@@ -285,20 +255,43 @@ let octaregexp = Str.regexp "^0.*"
 
 let base_to_dec str =
   if Str.string_match binaryregexp str 0
-  then my_base_to_dec (String.sub str 2 ((String.length str) - 2)) (bigint_of_string "2") 0 (bigint_of_string "0")
+  then my_base_to_dec (String.sub str 2 ((String.length str) - 2)) (Plus,"2") 0 (Plus, "0")
   else if Str.string_match hexaregexp str 0
-  then my_base_to_dec (String.sub str 2 ((String.length str) - 2)) (bigint_of_string "16") 0 (bigint_of_string "0")
+  then my_base_to_dec (String.sub str 2 ((String.length str) - 2)) (Plus, "16") 0 (Plus, "0")
   else if Str.string_match octaregexp str 0
-  then my_base_to_dec (String.sub str 1 ((String.length str) - 1)) (bigint_of_string "8") 0 (bigint_of_string "0")
-  else str
+  then my_base_to_dec (String.sub str 1 ((String.length str) - 1)) (Plus, "8") 0 (Plus, "0")  else str
 
 let abs_string_of_bigint_base base nbr = match base with
-  | Binary -> my_string_of_bigint_base (bigint_of_string "2") nbr
-  | Octal -> my_string_of_bigint_base (bigint_of_string "8") nbr
-  | Decimal -> string_of_bigint nbr
-  | Hexadecimal -> my_string_of_bigint_base (bigint_of_string "16") nbr
+  | Binary -> my_string_of_bigint_base (Plus, "2") nbr
+  | Hexadecimal -> my_string_of_bigint_base (Plus, "16") nbr
+  | Octal -> my_string_of_bigint_base (Plus, "8") nbr
+  | Decimal -> get_abs_value nbr
+
+let bigint_of_string s =
+  let my_string_without_sign s i len si =
+    if si == true
+    then (Plus , (pure (base_to_dec (String.sub s i len)) 0))
+    else (Minus , (pure (base_to_dec (String.sub s i len)) 0))
+  in let rec my_bigint_of_string s i len sign =
+       if len < 0 then failwith (invalid_arg "Empty String")
+       else
+	 match s.[i] with
+	 | '-' -> my_bigint_of_string s (i + 1) (len - 1) (not sign)
+	 | '+' -> my_bigint_of_string s (i + 1) (len - 1) (sign)
+	 | _ -> my_string_without_sign s i len sign
+     in if (String.length s) == 0
+	then raise (invalid_arg "Empty String")
+	else let res = my_bigint_of_string s 0 (String.length s) true in
+	     if isZero (get_abs_value res)
+	     then (Zero, "0")
+	     else res
+
+let string_of_bigint (sign, abs_value) = match sign with
+  | Minus -> "-"^abs_value
+  | Plus -> abs_value
+  | Zero -> "0"
 
 let string_of_bigint_base base (sign, nbr) = match sign with
-  | Plus -> abs_string_of_bigint_base base nbr
-  | Minus -> ("-" (abs_string_of_bigint_base base nbr))
+  | Plus -> abs_string_of_bigint_base base (sign, nbr)
+  | Minus -> ("-" ^ (abs_string_of_bigint_base base (sign, nbr)))
   | Zero -> "0"

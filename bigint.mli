@@ -4,11 +4,13 @@ type sign
 
 type t
 
+type base = Binary | Octal | Decimal | Hexadecimal
+
 val bigint_of_string : string -> t
 
 val string_of_bigint : t -> string
 
-(* val string_of_bigint_base : base -> t -> string *)
+val string_of_bigint_base : base -> t -> string
 
 val add : t -> t -> t
 
