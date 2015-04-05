@@ -23,7 +23,7 @@
 
 
 line:
-  |exp NEWLINE {begin print_endline ("[" ^ (ArithExpr.string_of_arith_expr $1) ^"]"); $1 end}
+  |exp NEWLINE {$1}
   |NEWLINE {Value(0)}
 ;
 

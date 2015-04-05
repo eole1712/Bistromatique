@@ -1,5 +1,5 @@
 (*header*)
-{open Test}
+{open Parser}
 
 (*definitions*)
 let binadigit = ['0'-'1']
