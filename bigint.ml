@@ -2,7 +2,7 @@
 
 type sign = Minus | Zero | Plus
 
-(* type base = Binary | Octal | Decimal | Hexadecimal *)
+type base = Binary | Octal | Decimal | Hexadecimal
 
 type abs_value = string
 
@@ -46,14 +46,17 @@ let bigint_of_string s =
 	then (Zero, "0")
 	else my_bigint_of_string s 0 (String.length s) true
 
-let get_abs_value (_, abs_value) = abs_value
-
-let get_sign (sign, _) = sign
-
 let string_of_bigint (sign, abs_value) = match sign with
   | Minus -> "-"^abs_value
   | Plus -> abs_value
   | Zero -> "0"
+
+
+
+let get_abs_value (_, abs_value) = abs_value
+
+let get_sign (sign, _) = sign
+
 
 let _base = "0123456789ABCDEF"
 
@@ -225,6 +228,35 @@ let modulo (sign, abs_value) (sign2, abs_value2) =
        then (Plus, st)
        else (Minus, st)
 
+let rec my_base_to_dec str base i res =
+  if i = (String.length str)
+  then string_of_bigint (res)
+  else let res =  (add (mul res base) (bigint_of_string (string_of_int (String.index _base str.[i])))) in
+       my_base_to_dec str base (i + 1) res
+
+let binaryregexp = Str.regexp "^0b.*"
+let hexaregexp = Str.regexp "^0x.*"
+let octaregexp = Str.regexp "^0.*"
+
+let base_to_dec str =
+  if Str.string_match binaryregexp str 0
+  then my_base_to_dec str (bigint_of_string("2")) 0 (bigint_of_string("0"))
+  else if Str.string_match hexaregexp str 0
+  then my_base_to_dec str (bigint_of_string("16")) 0 (bigint_of_string("0"))
+  else if Str.string_match octaregexp str 0
+  then my_base_to_dec str (bigint_of_string("8")) 0 (bigint_of_string("0"))
+  else str
+
+let rec my_string_of_bigint_base base nbr str =
+  if (_cmp nbr (sub base bigint_of_string "1") = 1)
+  then _base[int_of_string (string_of_bigint modulo (nbr base))]^my_string_of_bigint_base base (div nbr base)
+  else _base[int_of_string (string_of_bigint modulo (nbr base))]
+
+let string_of_bigint_base base nbr = match base with
+    | Binary -> my_string_of_bigint_base (bigint_of_string "2") nbr ""
+    | Octal -> my_string_of_bigint_base (bigint_of_string "8") nbr ""
+    | Decimal -> string_of_bigint nbr
+    | Hexadecimal -> my_string_of_bigint_base (bigint_of_string "16") nbr ""
 
 (* let string_of_bigint_base base (sign, abs_value) = *)
 (*   let conv_base_abs_string abs_value = function *)
