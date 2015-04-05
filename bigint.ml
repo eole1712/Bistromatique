@@ -43,7 +43,7 @@ let isZero s =
 let bigint_of_string s =
   let my_string_without_sign s i len si =
     if si == true
-    then (Plus , (pure (String.sub s i len) 0))
+    then (Plus , dec(pure (String.sub s i len) 0))
     else (Minus , (pure (String.sub s i len) 0))
   in let rec my_bigint_of_string s i len sign =
        if len < 0 then failwith (invalid_arg "Empty String")
@@ -224,7 +224,8 @@ let rec _div_mod a b =
 	 else let st = get_abs_value (_sub b_r1 a_r1) in
 	      (get_abs_value (_sub q1 "1"), get_abs_value (_sub b st))
 
-let div (sign, abs_value) (sign2, abs_value2) =
+let div (sign, abv) (sign2, abv2) =
+  let abs_value = (String.copy abv) and abs_value2 = (String.copy abv2) in
   if (sign2 == Zero || (isZero abs_value2))
   then raise (invalid_arg "Division by 0")
   else if sign == Zero
@@ -240,7 +241,8 @@ let div (sign, abs_value) (sign2, abs_value2) =
        then (Plus, pure res 0)
        else (Minus, pure res 0)
 
-let modulo (sign, abs_value) (sign2, abs_value2) =
+let modulo (sign, abv) (sign2, abv2) =
+  let abs_value = (String.copy abv) and abs_value2 = (String.copy abv2) in
   if (sign2 == Zero || (isZero abs_value2))
   then raise (invalid_arg "Modulo by 0")
   else if sign == Zero
@@ -256,11 +258,26 @@ let modulo (sign, abs_value) (sign2, abs_value2) =
        then (Plus, pure st 0)
        else (Minus, pure st 0)
 
+let string_of_char c =
+  let res = String.make 1 'a' in
+  begin
+    res.[0] <- c;
+    res
+  end
+
+let rec my_string_of_bigint_base base nbr =
+  let k = get_abs_value (modulo nbr base) in
+  let n = int_of_string k in
+  let t = string_of_char (_base.[n]) in
+  if (_cmp (get_abs_value nbr) (get_abs_value base)) != -1
+  then ((my_string_of_bigint_base base (div nbr base)) ^ t)
+  else t
+
 let rec my_base_to_dec str base i res =
   if i = (String.length str)
   then string_of_bigint (res)
-  else let res =  (add (mul res base) (bigint_of_string (string_of_int (String.index _base str.[i])))) in
-       my_base_to_dec str base (i + 1) res
+  else let res = (add (mul res base) (bigint_of_string (string_of_int (String.index _base str.[i])))) in
+    my_base_to_dec str base (i + 1) res
 
 let binaryregexp = Str.regexp "^0b.*"
 let hexaregexp = Str.regexp "^0x.*"
@@ -268,35 +285,20 @@ let octaregexp = Str.regexp "^0.*"
 
 let base_to_dec str =
   if Str.string_match binaryregexp str 0
-  then my_base_to_dec str (bigint_of_string "2") 0 (bigint_of_string "0")
+  then my_base_to_dec (String.sub str 2 ((String.length str) - 2)) (bigint_of_string "2") 0 (bigint_of_string "0")
   else if Str.string_match hexaregexp str 0
-  then my_base_to_dec str (bigint_of_string "16") 0 (bigint_of_string "0")
+  then my_base_to_dec (String.sub str 2 ((String.length str) - 2)) (bigint_of_string "16") 0 (bigint_of_string "0")
   else if Str.string_match octaregexp str 0
-  then my_base_to_dec str (bigint_of_string "8") 0 (bigint_of_string "0")
+  then my_base_to_dec (String.sub str 1 ((String.length str) - 1)) (bigint_of_string "8") 0 (bigint_of_string "0")
   else str
 
-let string_of_char c =
-  let res = "a" in
-  begin
-    res.[0] <- c;
-    res
-  end
+let abs_string_of_bigint_base base nbr = match base with
+  | Binary -> my_string_of_bigint_base (bigint_of_string "2") nbr
+  | Octal -> my_string_of_bigint_base (bigint_of_string "8") nbr
+  | Decimal -> string_of_bigint nbr
+  | Hexadecimal -> my_string_of_bigint_base (bigint_of_string "16") nbr
 
-let rec my_string_of_bigint_base base nbr =
-  if ((_cmp (string_of_bigint nbr) (string_of_bigint (sub base (bigint_of_string "1")))) = 1)
-  then ((string_of_char(_base.[(int_of_string (string_of_bigint (modulo nbr base)))])) ^ (my_string_of_bigint_base base (div nbr base)))
-  else (string_of_char(_base.[int_of_string (string_of_bigint (modulo nbr base))]))
-
-let string_of_bigint_base base nbr = match base with
-    | Binary -> my_string_of_bigint_base (bigint_of_string "2") nbr
-    | Octal -> my_string_of_bigint_base (bigint_of_string "8") nbr
-    | Decimal -> string_of_bigint nbr
-    | Hexadecimal -> my_string_of_bigint_base (bigint_of_string "16") nbr
-
-(* let string_of_bigint_base base (sign, abs_value) = *)
-(*   let conv_base_abs_string abs_value = function *)
-(* 	| Binary ->  *)
-(*   match sign with *)
-(*   | Minus -> "-" ^ (conv_base_abs_string abs_value base) *)
-(*   | Plus -> (conv_base_abs_string abs_value base) *)
-(*   | _ -> "0" *)
+let string_of_bigint_base base (sign, nbr) = match sign with
+  | Plus -> abs_string_of_bigint_base base nbr
+  | Minus -> ("-" (abs_string_of_bigint_base base nbr))
+  | Zero -> "0"
