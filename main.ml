@@ -9,7 +9,7 @@ let main () =
 	let k = Parser.line Lexer.token lexbuf in
 	begin
 	  print_endline (ArithExpr.string_of_arith_expr k);
-	  print_endline (string_of_int (ArithExpr.solve_arith_expr k))
+	  print_endline (Bigint.string_of_bigint (ArithExpr.solve_arith_expr k))
 	end
       end
     done

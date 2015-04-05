@@ -1,7 +1,7 @@
 type my_Operation = Op_Add | Op_Sub | Op_Mul | Op_Div | Op_Mod
 
 type arith_expr =
-  | Value of (int)
+  | Value of (Bigint.t)
   | Op of (my_Operation * arith_expr * arith_expr)
 
 let isValue = function
@@ -15,7 +15,7 @@ let clean s =
   else s
 
 let rec string_of_arith_expr = function
-    | Value(n) -> (string_of_int n) ^ " "
+    | Value(n) -> (Bigint.string_of_bigint n) ^ " "
     | Op(op, n1, n2) -> let s = match op with
 			  | Op_Add -> "+ "
 			  | Op_Sub -> "- "
@@ -33,8 +33,8 @@ let rec string_of_arith_expr = function
 let rec solve_arith_expr = function
     | Value(n) -> n
     | Op(op, n1, n2) -> match op with
-			| Op_Add -> (* Bigint.add *) (solve_arith_expr n1) + (solve_arith_expr n2)
-			| Op_Sub -> (* Bigint.sub *) (solve_arith_expr n1) - (solve_arith_expr n2)
-			| Op_Mul -> (* Bigint.mul *) (solve_arith_expr n1) * (solve_arith_expr n2)
-			| Op_Div -> (* Bigint.div *) (solve_arith_expr n1) / (solve_arith_expr n2)
-			| Op_Mod -> (* Bigint.modulo *) (solve_arith_expr n1) mod (solve_arith_expr n2)
+			| Op_Add -> Bigint.add (solve_arith_expr n1) (solve_arith_expr n2)
+			| Op_Sub -> Bigint.sub (solve_arith_expr n1) (solve_arith_expr n2)
+			| Op_Mul -> Bigint.mul (solve_arith_expr n1) (solve_arith_expr n2)
+			| Op_Div -> Bigint.div (solve_arith_expr n1) (solve_arith_expr n2)
+			| Op_Mod -> Bigint.modulo (solve_arith_expr n1) (solve_arith_expr n2)

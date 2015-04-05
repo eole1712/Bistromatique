@@ -1,5 +1,6 @@
 %{
     open ArithExpr
+    open Bigint
 %}
 
 
@@ -41,7 +42,7 @@ term:
 ;
 
 factor:
-  |NUMBER		{Value(int_of_string $1)}
+  |NUMBER		{Value(Bigint.bigint_of_string $1)}
   |OBRACE exp CBRACE	{$2}
 ;
 
