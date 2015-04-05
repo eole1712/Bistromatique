@@ -25,7 +25,7 @@
 
 line:
   |exp NEWLINE {$1}
-  |NEWLINE {Value(0)}
+  |NEWLINE {Value(Bigint.bigint_of_string "0")}
 ;
 
 exp:

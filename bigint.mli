@@ -1,31 +1,21 @@
 (*  Bigint module by ghukas_g and malbra_t *)
 
+type sign
 
-module type BIGINT =
-  sig
+type t
 
-    type sign
+val bigint_of_string : string -> t
 
-    type t
+val string_of_bigint : t -> string
 
-    val bigint_of_string : string -> t
+(* val string_of_bigint_base : base -> t -> string *)
 
-    (* val get_abs_value : t -> string *)
+val add : t -> t -> t
 
-    (* val get_sign : t -> sign *)
+val sub : t -> t -> t
 
-    val string_of_bigint : t -> string
+val mul : t -> t -> t
 
-    (* val string_of_bigint_base : base -> t -> string *)
+val div : t -> t -> t
 
-    val add : t -> t -> string
-
-    val sub : t -> t -> string
-
-  (* val mul : t -> t -> t *)
-
-  (* val div : t -> t -> t *)
-
-  (* val modulo : t -> t -> t *)
-
-  end
+val modulo : t -> t -> t
