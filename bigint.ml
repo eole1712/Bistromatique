@@ -14,6 +14,13 @@ type t = (sign * abs_value)
 
 (* String Outils  *)
 
+let _move_left abs_value n =
+  let res = String.make ((String.length abs_value) + n) '0' in
+  begin
+    String.blit abs_value 0 res 0 (String.length abs_value);
+    res
+  end
+
 let rev s =
   let l = Str.split (Str.regexp "") s in
   List.fold_left (fun a b -> b ^ a) "" l
@@ -24,6 +31,12 @@ let rec pure s i =
   else if s.[i] != '0' || (String.length s) - i == 1
   then (String.sub s i ((String.length s) - i))
   else pure s (i + 1)
+
+let isZero s =
+  let tmp = pure s 0 in
+  if (String.length tmp) = 1 && tmp.[0] = '0'
+  then true
+  else false
 
 (* End String Outils  *)
 
@@ -116,16 +129,12 @@ let sub (sign, abs_value) (sign2, abs_value2) =
   then if sign2 == Minus
        then (Plus, abs_value2)
        else (sign2, abs_value2)
-  else if (sign == sign2)
-  then _sub abs_value abs_value2
-  else (sign, get_abs_value (_add abs_value abs_value2))
-
-let _move_left abs_value n =
-  let res = String.make ((String.length abs_value) + n) '0' in
-  begin
-    String.blit abs_value 0 res 0 (String.length abs_value);
-    res
-  end
+  else let (s, r) = if (sign == sign2)
+		 then _sub abs_value abs_value2
+		 else (sign, get_abs_value (_add abs_value abs_value2))
+       in if (isZero r)
+	  then (Zero, "0")
+	  else (s, r)
 
 let rec _mul n1 n2 =
   if (String.length n2) > (String.length n1)
@@ -141,8 +150,8 @@ let rec _mul n1 n2 =
 	 then string_of_int ((String.index _base n1.[0]) * (String.index _base n2.[0]))
 	 else
 	   let l = l1 / 2 in
-	   let n11 = String.sub n1 0 (l1 - l)  in
-	   let n12 = String.sub n1 (l1 - l) l  in
+	   let n11 = String.sub n1 0 (l1 - l) in
+	   let n12 = String.sub n1 (l1 - l) l in
 	   let n21 = String.sub n2 0 (l1 - l) in
 	   let n22 = String.sub n2 (l1 - l) l in
 	   let n1121 = _mul_eq n11 n21 in
@@ -151,7 +160,7 @@ let rec _mul n1 n2 =
 	   let n1_n2 = get_abs_value (_sub (get_abs_value (_sub n1n2 n1121)) n1222) in
 	   get_abs_value (_add (get_abs_value (_add (_move_left n1121 (2 * l)) (_move_left n1_n2 l))) n1222)
        in let res = _mul_eq n1 n2 in
-	  if diff > 0 then
+	  if diff > 0  && (isZero res) == false then
 	    String.sub res 0 ((String.length res) - diff)
 	  else res
 
@@ -177,53 +186,72 @@ let _div_mod_i n1 n =
     (res, !st);
   end
 
-let rec _div_mod n1 n2 =
-  if (String.length n2) <= 2
+let _cmp n1 n2 =
+  let (sign, _) = sub (Plus, n1) (Plus, n2) in
+  match sign with
+    | Plus -> 1
+    | Minus -> -1
+    | Zero -> 0
+
+let rec _div_mod a b =
+  if (String.length b) <= 2
   then let tmp =
-	 if (String.length n2 < 2)
-	 then (String.index _base n2.[0])
-	 else (String.index _base n2.[0]) * 10 + (String.index _base n2.[1])
-       in let (res, st) = _div_mod_i n1 tmp in
-	  ((pure res 0), (pure (string_of_int st) 0))
+	 if (String.length b < 2)
+	 then (String.index _base b.[0])
+	 else (String.index _base b.[0]) * 10 + (String.index _base b.[1])
+       in let (res, st) = _div_mod_i a tmp in
+	  (res, (string_of_int st))
   else
-    let n = ((String.length n2) - 1) / 2 in
-    let n11 = String.sub n1 ((String.length n1) - n) n in
-    let n12 = String.sub n2 n ((String.length n1) - n) in
-    if (String.compare n11 n2) >= 0
-    then let (res1, st1) = _div_mod n12 n2 in
-	 let tmp = get_abs_value (_add (_move_left st1 n) n11) in
-	 let (res2, st2) = _div_mod tmp n2 in
-	 (pure (get_abs_value (_add (_move_left res1 n) res2)) 0, pure st2 0)
-    else let n21 = String.sub n2 ((String.length n2) - n) n in
-	 let n22 = String.sub n2 0 ((String.length n2) - n) in
-	 let (res1, st1) = _div_mod n12 n22 in
-	 let a_st1 = get_abs_value (_add (_move_left st1 n) n11) in
-	 let b_st1 = _mul n21 res1 in
-	 if (String.compare a_st1 b_st1) >= 0
-	 then let st = get_abs_value (_sub a_st1 b_st1) in
-	      (pure res1 0, pure st 0)
-	 else let st = get_abs_value (_sub a_st1 b_st1) in
-	      (pure (get_abs_value (_sub res1 "1")) 0, pure (get_abs_value (_sub n2 st)) 0)
+    let n = ((String.length b) - 1) / 2 in
+    let a0 = String.sub a ((String.length a) - n) n in
+    let a1 = String.sub a 0 ((String.length a) - n) in
+    if (_cmp a1 b) >= 0
+    then let (q1, r1) = _div_mod a1 b in
+	 let tmp = get_abs_value (_add (_move_left r1 n) a0) in
+	 let (q0, r0) = _div_mod tmp b in
+	 (get_abs_value (_add (_move_left q1 n) q0), r0)
+    else let b0 = String.sub b ((String.length b) - n) n in
+	 let b1 = String.sub b 0 ((String.length b) - n) in
+	 let (q1, r1) = _div_mod a1 b1 in
+	 let a_r1 = get_abs_value (_add (_move_left r1 n) a0) in
+	 let b_r1 = _mul b0 q1 in
+	 if (_cmp a_r1 b_r1) >= 0
+	 then let st = get_abs_value (_sub a_r1 b_r1) in
+	      (q1, st)
+	 else let st = get_abs_value (_sub b_r1 a_r1) in
+	      (get_abs_value (_sub q1 "1"), get_abs_value (_sub b st))
 
 let div (sign, abs_value) (sign2, abs_value2) =
-  if (sign2 == Zero)
+  if (sign2 == Zero || (isZero abs_value2))
   then raise (invalid_arg "Division by 0")
   else if sign == Zero
   then (sign, abs_value)
+  else if _cmp abs_value abs_value2 == 0
+  then if sign == sign2
+       then (Plus,  "1")
+       else (Minus, "1")
+  else if _cmp abs_value abs_value2 == -1
+  then (Zero, "0")
   else let (res, _) = _div_mod abs_value abs_value2 in
        if sign == sign2
-       then (Plus, res)
-       else (Minus, res)
+       then (Plus, pure res 0)
+       else (Minus, pure res 0)
 
 let modulo (sign, abs_value) (sign2, abs_value2) =
-  if (sign2 == Zero)
+  if (sign2 == Zero || (isZero abs_value2))
   then raise (invalid_arg "Modulo by 0")
   else if sign == Zero
   then (sign, abs_value)
+  else if _cmp abs_value abs_value2 == 0
+  then (Zero, "0")
+  else if _cmp abs_value abs_value2 == -1
+  then if sign == sign2
+       then (Plus,  abs_value)
+       else (Minus, abs_value)
   else let (_, st) = _div_mod abs_value abs_value2 in
        if sign == sign2
-       then (Plus, st)
-       else (Minus, st)
+       then (Plus, pure st 0)
+       else (Minus, pure st 0)
 
 
 (* let string_of_bigint_base base (sign, abs_value) = *)
