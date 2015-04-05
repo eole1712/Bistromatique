@@ -1,13 +1,15 @@
-type token =
-  | NUMBER of (string)
-  | ADD
+exception Error
+
+type token = 
   | SUB
-  | DIV
+  | OBRACE
+  | NUMBER of (string)
+  | NEWLINE
   | MUL
   | MOD
-  | OBRACE
+  | DIV
   | CBRACE
-  | NEWLINE
+  | ADD
 
-val line :
-  (Lexing.lexbuf  -> token) -> Lexing.lexbuf -> ArithExpr.arith_expr
+
+val line: (Lexing.lexbuf -> token) -> Lexing.lexbuf -> (ArithExpr.arith_expr)

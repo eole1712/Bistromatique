@@ -8,9 +8,9 @@ type abs_value = string
 
 type t = (sign * abs_value)
 
-let abs_value (_, value) = value
+(* let abs_value (_, value) = value *)
 
-let get_sign (sign, value) = sign
+(* let get_sign (sign, value) = sign *)
 
 (* String Outils  *)
 

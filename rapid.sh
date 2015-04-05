@@ -3,7 +3,7 @@ ocamlc -c bigint.mli
 ocamlc -c bigint.ml
 ocamlc -c arithExpr.mli
 ocamlc -c arithExpr.ml
-ocamlyacc parser.mly
+menhir parser.mly
 ocamlc -c parser.mli
 ocamllex lexer.mll
 ocamlc -c lexer.ml

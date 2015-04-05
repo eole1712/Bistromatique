@@ -1,6 +1,5 @@
 %{
     open ArithExpr
-    open Bigint
 %}
 
 
