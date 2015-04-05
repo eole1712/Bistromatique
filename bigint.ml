@@ -268,23 +268,30 @@ let octaregexp = Str.regexp "^0.*"
 
 let base_to_dec str =
   if Str.string_match binaryregexp str 0
-  then my_base_to_dec str (bigint_of_string("2")) 0 (bigint_of_string("0"))
+  then my_base_to_dec str (bigint_of_string "2") 0 (bigint_of_string "0")
   else if Str.string_match hexaregexp str 0
-  then my_base_to_dec str (bigint_of_string("16")) 0 (bigint_of_string("0"))
+  then my_base_to_dec str (bigint_of_string "16") 0 (bigint_of_string "0")
   else if Str.string_match octaregexp str 0
-  then my_base_to_dec str (bigint_of_string("8")) 0 (bigint_of_string("0"))
+  then my_base_to_dec str (bigint_of_string "8") 0 (bigint_of_string "0")
   else str
 
-let rec my_string_of_bigint_base base nbr str =
-  if (_cmp nbr (sub base bigint_of_string "1") = 1)
-  then _base[int_of_string (string_of_bigint modulo (nbr base))]^my_string_of_bigint_base base (div nbr base)
-  else _base[int_of_string (string_of_bigint modulo (nbr base))]
+let string_of_char c =
+  let res = "a" in
+  begin
+    res.[0] <- c;
+    res
+  end
+
+let rec my_string_of_bigint_base base nbr =
+  if ((_cmp (string_of_bigint nbr) (string_of_bigint (sub base (bigint_of_string "1")))) = 1)
+  then ((string_of_char(_base.[(int_of_string (string_of_bigint (modulo nbr base)))])) ^ (my_string_of_bigint_base base (div nbr base)))
+  else (string_of_char(_base.[int_of_string (string_of_bigint (modulo nbr base))]))
 
 let string_of_bigint_base base nbr = match base with
-    | Binary -> my_string_of_bigint_base (bigint_of_string "2") nbr ""
-    | Octal -> my_string_of_bigint_base (bigint_of_string "8") nbr ""
+    | Binary -> my_string_of_bigint_base (bigint_of_string "2") nbr
+    | Octal -> my_string_of_bigint_base (bigint_of_string "8") nbr
     | Decimal -> string_of_bigint nbr
-    | Hexadecimal -> my_string_of_bigint_base (bigint_of_string "16") nbr ""
+    | Hexadecimal -> my_string_of_bigint_base (bigint_of_string "16") nbr
 
 (* let string_of_bigint_base base (sign, abs_value) = *)
 (*   let conv_base_abs_string abs_value = function *)
